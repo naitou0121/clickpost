@@ -1,0 +1,102 @@
+:root{
+  --bg:#f2f2f7; --card:#ffffff; --card2:#f7f7fa;
+  --text:#111114; --sub:#6e6e78; --line:#e3e3ea;
+  --accent:#0a84ff; --ok:#30a46c; --warn:#e5484d; --amber:#c47d18;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --card:#1c1c1e; --card2:#2c2c2e;
+    --text:#f2f2f7; --sub:#9a9aa2; --line:#3a3a3c;
+    --accent:#0a84ff; --ok:#3ddc84; --warn:#ff6b6f; --amber:#e0a33a;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-size:16px; line-height:1.55;
+  padding:0 0 120px; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px}
+header{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--bg) 82%, transparent);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;
+}
+header h1{margin:0;font-size:17px;font-weight:650;letter-spacing:.01em}
+header .cnt{float:right;font-size:13px;color:var(--sub);font-weight:500;line-height:26px}
+h2{font-size:13px;font-weight:600;color:var(--sub);margin:22px 0 8px;padding-left:2px;letter-spacing:.02em}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:10px;border:1px solid var(--line)}
+textarea,input,select{
+  width:100%;font:inherit;color:var(--text);background:var(--card2);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+  outline:none;appearance:none;
+}
+textarea{min-height:150px;resize:vertical;line-height:1.6}
+input:focus,textarea:focus{border-color:var(--accent);background:var(--card)}
+button{
+  font:inherit;font-weight:600;border:none;border-radius:12px;
+  padding:13px 16px;background:var(--accent);color:#fff;width:100%;
+  cursor:pointer;transition:transform .12s ease,opacity .12s ease;
+}
+button:active{transform:scale(.975);opacity:.85}
+button.sec{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+button.ghost{background:transparent;color:var(--warn);border:1px solid var(--line)}
+button:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.f{margin-bottom:9px}
+.f label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600}
+.f .lim{float:right;font-variant-numeric:tabular-nums;font-weight:500}
+.over{color:var(--warn)!important}
+input.over{border-color:var(--warn)}
+.tag{
+  display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;
+  border-radius:20px;background:var(--card2);color:var(--sub);border:1px solid var(--line);
+}
+.tag.ng{color:var(--warn);border-color:var(--warn)}
+.hint{font-size:12.5px;color:var(--sub);line-height:1.6;margin:6px 2px 0}
+.item{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;
+}
+.item .n{font-size:12px;color:var(--sub);font-weight:700;min-width:22px;padding-top:2px;font-variant-numeric:tabular-nums}
+.item .b{flex:1;min-width:0}
+.item .nm{font-weight:650;font-size:15px}
+.item .ad{font-size:13px;color:var(--sub);word-break:break-all;margin-top:2px}
+.item .ct{font-size:12px;color:var(--sub);margin-top:3px}
+.item .x{background:none;border:none;color:var(--sub);font-size:20px;width:32px;padding:0;line-height:1}
+.empty{text-align:center;color:var(--sub);font-size:13.5px;padding:22px 10px}
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  padding:10px 14px calc(env(safe-area-inset-bottom) + 12px);
+  background:color-mix(in srgb,var(--bg) 88%, transparent);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-top:1px solid var(--line);
+}
+.bar .wrap{padding:0}
+details{margin:14px 0 0}
+summary{font-size:12.5px;color:var(--sub);cursor:pointer;padding:6px 2px;font-weight:600}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;margin-bottom:10px;display:none}
+.msg.show{display:block}
+.msg.err{background:color-mix(in srgb,var(--warn) 14%, transparent);color:var(--warn)}
+.msg.ok{background:color-mix(in srgb,var(--ok) 15%, transparent);color:var(--ok)}
+.parsed{border-left:3px solid var(--accent)}
+
+/* ===== 「広く使う」ボタン（Chrome拡張のポップアップでだけ出る） ===== */
+#btnPopout{
+  width:auto; float:right; margin-left:10px;
+  font-size:11.5px; font-weight:600; padding:4px 10px;
+  background:var(--card2); color:var(--sub); border:1px solid var(--line); border-radius:20px;
+}
+
+/* ===== Chrome拡張のポップアップ用 ===== */
+body.popup{width:420px;padding-bottom:96px}
+body.popup header{padding-top:10px}
+body.popup textarea{min-height:120px}

@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "クリックポストCSVメーカー",
+  "version": "1.0.0",
+  "description": "宛先を貼るだけでクリックポストのまとめ申込CSVを作ります。どのウェブサイトにもアクセスしません。",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "クリックポストCSVメーカー",
+    "default_icon": { "48": "icon-48.png", "128": "icon-128.png" }
+  },
+  "icons": { "48": "icon-48.png", "128": "icon-128.png", "512": "icon-512.png" }
+}
