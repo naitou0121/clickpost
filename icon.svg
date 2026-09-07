@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF453A"/>
+      <stop offset="1" stop-color="#C9252D"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#g)"/>
+  <!-- 封筒 -->
+  <g transform="translate(256,268)">
+    <rect x="-140" y="-92" width="280" height="184" rx="22" fill="#ffffff"/>
+    <path d="M-140 -70 L0 30 L140 -70" fill="none" stroke="#C9252D" stroke-width="22"
+          stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <!-- 上の3本線（＝まとめて複数件） -->
+  <g fill="#ffffff" opacity="0.92">
+    <rect x="146" y="104" width="220" height="20" rx="10"/>
+    <rect x="176" y="140" width="160" height="20" rx="10"/>
+  </g>
+</svg>
