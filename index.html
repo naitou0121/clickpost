@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f5f5f7">
+<title>クリックポストCSVメーカー</title>
+<link rel="manifest" href="manifest.json">
+<style>
+:root{
+  --bg:#f2f2f7; --card:#ffffff; --card2:#f7f7fa;
+  --text:#111114; --sub:#6e6e78; --line:#e3e3ea;
+  --accent:#0a84ff; --ok:#30a46c; --warn:#e5484d; --amber:#c47d18;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#000000; --card:#1c1c1e; --card2:#2c2c2e;
+    --text:#f2f2f7; --sub:#9a9aa2; --line:#3a3a3c;
+    --accent:#0a84ff; --ok:#3ddc84; --warn:#ff6b6f; --amber:#e0a33a;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",sans-serif;
+  font-size:16px; line-height:1.55;
+  padding:0 0 120px; -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:640px;margin:0 auto;padding:0 14px}
+header{
+  position:sticky;top:0;z-index:20;
+  background:color-mix(in srgb,var(--bg) 82%, transparent);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--line);
+  padding:calc(env(safe-area-inset-top) + 10px) 14px 10px;
+}
+header h1{margin:0;font-size:17px;font-weight:650;letter-spacing:.01em}
+header .cnt{float:right;font-size:13px;color:var(--sub);font-weight:500;line-height:26px}
+h2{font-size:13px;font-weight:600;color:var(--sub);margin:22px 0 8px;padding-left:2px;letter-spacing:.02em}
+.card{background:var(--card);border-radius:var(--r);padding:14px;margin-bottom:10px;border:1px solid var(--line)}
+textarea,input,select{
+  width:100%;font:inherit;color:var(--text);background:var(--card2);
+  border:1px solid var(--line);border-radius:10px;padding:10px 12px;
+  outline:none;appearance:none;
+}
+textarea{min-height:150px;resize:vertical;line-height:1.6}
+input:focus,textarea:focus{border-color:var(--accent);background:var(--card)}
+button{
+  font:inherit;font-weight:600;border:none;border-radius:12px;
+  padding:13px 16px;background:var(--accent);color:#fff;width:100%;
+  cursor:pointer;transition:transform .12s ease,opacity .12s ease;
+}
+button:active{transform:scale(.975);opacity:.85}
+button.sec{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+button.ghost{background:transparent;color:var(--warn);border:1px solid var(--line)}
+button:disabled{opacity:.4;cursor:default}
+.row{display:flex;gap:8px}
+.row>*{flex:1}
+.f{margin-bottom:9px}
+.f label{display:block;font-size:12px;color:var(--sub);margin-bottom:4px;font-weight:600}
+.f .lim{float:right;font-variant-numeric:tabular-nums;font-weight:500}
+.over{color:var(--warn)!important}
+input.over{border-color:var(--warn)}
+.tag{
+  display:inline-block;font-size:11px;font-weight:600;padding:2px 8px;
+  border-radius:20px;background:var(--card2);color:var(--sub);border:1px solid var(--line);
+}
+.tag.ng{color:var(--warn);border-color:var(--warn)}
+.hint{font-size:12.5px;color:var(--sub);line-height:1.6;margin:6px 2px 0}
+.item{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--r);
+  padding:12px 14px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;
+}
+.item .n{font-size:12px;color:var(--sub);font-weight:700;min-width:22px;padding-top:2px;font-variant-numeric:tabular-nums}
+.item .b{flex:1;min-width:0}
+.item .nm{font-weight:650;font-size:15px}
+.item .ad{font-size:13px;color:var(--sub);word-break:break-all;margin-top:2px}
+.item .ct{font-size:12px;color:var(--sub);margin-top:3px}
+.item .x{background:none;border:none;color:var(--sub);font-size:20px;width:32px;padding:0;line-height:1}
+.empty{text-align:center;color:var(--sub);font-size:13.5px;padding:22px 10px}
+.bar{
+  position:fixed;left:0;right:0;bottom:0;z-index:30;
+  padding:10px 14px calc(env(safe-area-inset-bottom) + 12px);
+  background:color-mix(in srgb,var(--bg) 88%, transparent);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-top:1px solid var(--line);
+}
+.bar .wrap{padding:0}
+details{margin:14px 0 0}
+summary{font-size:12.5px;color:var(--sub);cursor:pointer;padding:6px 2px;font-weight:600}
+.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px}
+.msg{font-size:13px;padding:10px 12px;border-radius:10px;margin-bottom:10px;display:none}
+.msg.show{display:block}
+.msg.err{background:color-mix(in srgb,var(--warn) 14%, transparent);color:var(--warn)}
+.msg.ok{background:color-mix(in srgb,var(--ok) 15%, transparent);color:var(--ok)}
+.parsed{border-left:3px solid var(--accent)}
+</style>
+</head>
+<body>
+
+<header>
+  <div style="max-width:640px;margin:0 auto">
+    <span class="cnt" id="hcount">0 / 40</span>
+    <h1>クリックポスト CSVメーカー</h1>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <h2>① セラーセントラルからコピーして貼る</h2>
+  <div class="card">
+    <textarea id="paste" placeholder="560-0036&#10;大阪府&#10;豊中市蛍池西町&#10;1-2-5&#10;山本勝久&#10;&#10;（続けて何件でも。空行で区切ってもOK・区切らなくてもOK）"></textarea>
+    <div class="hint">郵便番号・都道府県・住所・氏名を自動で振り分けます。電話番号と「日本 / JP」は捨てます。</div>
+    <div class="row" style="margin-top:10px">
+      <button class="sec" id="btnClear" style="flex:0 0 96px">クリア</button>
+      <button id="btnParse">振り分ける</button>
+    </div>
+  </div>
+
+  <div id="msg" class="msg"></div>
+
+  <div id="preview"></div>
+
+  <h2>② 送るリスト <span id="lcount" style="font-weight:500"></span></h2>
+  <div id="list"></div>
+
+  <details>
+    <summary>上級設定（ふつうは触らなくていい）</summary>
+    <div class="card" style="margin-top:8px">
+      <div class="f">
+        <label>内容品の初期値</label>
+        <input id="defItem" value="書籍">
+      </div>
+      <div class="f">
+        <label>CSVのヘッダー行（公式テンプレートと違ったらここを直す）</label>
+        <input id="header" class="mono" value="お届け先郵便番号,お届け先氏名,お届け先敬称,お届け先住所1行目,お届け先住所2行目,お届け先住所3行目,お届け先住所4行目,内容品">
+      </div>
+      <div class="f">
+        <label>敬称</label>
+        <select id="keisho"><option>様</option><option>御中</option></select>
+      </div>
+      <button class="ghost" id="btnWipe" style="margin-top:6px">リストを全部消す</button>
+    </div>
+  </details>
+
+  <p class="hint" style="margin-top:18px">
+    出力は Shift-JIS・1ファイル40件まで（41件以上は自動で分割）。<br>
+    クリックポスト →「まとめ申込」→「ファイルを選択」で、保存したCSVを選ぶ。
+  </p>
+</div>
+
+<div class="bar">
+  <div class="wrap" style="max-width:640px;margin:0 auto">
+    <button id="btnCsv" disabled>CSVを作る</button>
+  </div>
+</div>
+
+<script src="encoding.min.js"></script>
+<script>
+/* ===== 定数 ===== */
+const PREFS = ["北海道","青森県","岩手県","宮城県","秋田県","山形県","福島県","茨城県","栃木県","群馬県","埼玉県","千葉県","東京都","神奈川県","新潟県","富山県","石川県","福井県","山梨県","長野県","岐阜県","静岡県","愛知県","三重県","滋賀県","京都府","大阪府","兵庫県","奈良県","和歌山県","鳥取県","島根県","岡山県","広島県","山口県","徳島県","香川県","愛媛県","高知県","福岡県","佐賀県","長崎県","熊本県","大分県","宮崎県","鹿児島県","沖縄県"];
+const ADDR_KW = /[都道府県市区町村郡丁目番地号条通ビル階棟室荘寮邸]|マンション|アパート|ハイツ|コーポ|メゾン|レジデンス|パレス|ハウス|タワー|プラザ|ヒルズ|方$/;
+const BLDG_KW = /ビル|マンション|アパート|ハイツ|コーポ|メゾン|レジデンス|パレス|ハウス|タワー|プラザ|ヒルズ|荘$|階|号室|棟/;
+const LIM_NAME = 20, LIM_ADDR = 20, LIM_ITEM = 15, MAX_ROWS = 40;
+
+/* ===== 文字幅（全角1・半角0.5） ===== */
+function w(s){let n=0;for(const c of String(s||"")){n += /[\x20-\x7E｡-ﾟ]/.test(c)?0.5:1;}return n;}
+function toHalf(s){
+  return String(s||"")
+    .replace(/[Ａ-Ｚａ-ｚ０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+    .replace(/[‐‑‒–—―－−]/g,"-")
+    .replace(/　/g," ");
+}
+function normNum(s){ // 番地まわりだけ半角化（氏名は触らない）
+  return String(s||"").replace(/[０-９]/g,c=>String.fromCharCode(c.charCodeAt(0)-0xFEE0))
+                      .replace(/[－−‐‑–—―]/g,"-").replace(/　/g," ").trim();
+}
+
+/* ===== 貼り付けテキスト → 件ごとに分割 ===== */
+const ZIP_RE = /〒?\s*(\d{3})\s*[-‐‑–—―ー－−]?\s*(\d{4})(?![\d-])/;
+const TEL_RE = /^[\d\-+() 　]+$/;
+function splitBlocks(text){
+  const norm = toHalf(text).replace(/\r\n?/g,"\n");
+  // まず空行で切る
+  let blocks = norm.split(/\n\s*\n+/).map(b=>b.trim()).filter(Boolean);
+  // 空行が無いのに郵便番号が複数ある塊は、2つ目以降の郵便番号の手前で切る
+  const out = [];
+  for(const b of blocks){
+    const lines = b.split("\n");
+    let cur = [], seenZip = false;
+    for(const ln of lines){
+      const d = ln.replace(/[^\d]/g,"");
+      const isTel = TEL_RE.test(ln.trim()) && d.length>=10 && d.length<=11;
+      const hasZip = !isTel && ZIP_RE.test(ln);
+      if(hasZip && seenZip && cur.length){ out.push(cur.join("\n")); cur = []; seenZip = false; }
+      if(hasZip) seenZip = true;
+      cur.push(ln);
+    }
+    if(cur.length) out.push(cur.join("\n"));
+  }
+  return out.map(b=>b.trim()).filter(Boolean);
+}
+
+/* ===== 1件ぶんの振り分け ===== */
+function parseBlock(block){
+  // 行 → カンマでも割る（「豊中市蛍池西町, 大阪府 560-0036」対策）
+  let tokens = [];
+  block.split("\n").forEach(line=>{
+    line.split(/[,、，]/).forEach(t=>{ t = t.trim(); if(t) tokens.push(t); });
+  });
+
+  let zip = "", tel = "", pref = "";
+  const rest = [], nameCand = [];
+
+  tokens.forEach((t, idx)=>{
+    // 国名
+    if(/^(日本|JP|JPN|Japan|JAPAN)$/i.test(t)) return;
+    // 敬称だけの行
+    if(/^(様|御中|さん)$/.test(t)) return;
+    // 電話番号（郵便番号より先に判定する：090-1234-5678 を〒と誤読しないため）
+    const digits = t.replace(/[^\d]/g,"");
+    if(TEL_RE.test(t) && digits.length>=10 && digits.length<=11){ if(!tel) tel = t; return; }
+    if(/^(TEL|電話|Tel|phone|携帯)/i.test(t)){ if(!tel) tel = t; return; }
+
+    // 郵便番号を抜く
+    const m = t.match(ZIP_RE);
+    if(m){
+      if(!zip) zip = m[1] + m[2];
+      t = t.replace(ZIP_RE,"").replace(/〒/g,"").trim();
+      if(!t) return;
+    }
+
+    // 都道府県
+    const p = PREFS.find(pp => t === pp || t.startsWith(pp));
+    if(p){
+      if(!pref){
+        pref = p;
+        const tail = t.slice(p.length).trim();
+        if(tail) rest.push(tail);
+        return;
+      }
+      if(t === pref) return;                 // 同じ都道府県が2回出てきたら捨てる
+      const tail = t.slice(p.length).trim();
+      if(tail){ rest.push(tail); return; }
+      return;
+    }
+    // 氏名候補：数字なし・住所語なし・20字以内
+    if(!/\d/.test(t) && !ADDR_KW.test(t) && w(t) <= 20){
+      nameCand.push({t, idx});
+      return;
+    }
+    rest.push(t);
+  });
+
+  // 氏名候補のスコアリング（建物名を氏名と誤認しないため）
+  let name = "";
+  if(nameCand.length){
+    const last = tokens.length - 1;
+    const scored = nameCand.map(c=>{
+      let s = 0;
+      const len = c.t.replace(/\s/g,"").length;
+      if(len>=2 && len<=6) s += 3; else if(len<=8) s += 1; else s -= 2;
+      if(/^[一-鿿々\s]+$/.test(c.t)) s += 3;                 // 漢字だけ＝人名っぽい
+      if(/^[ぁ-んァ-ヶー一-鿿\s]+$/.test(c.t)) s += 1;
+      if(BLDG_KW.test(c.t)) s -= 6;                                       // 建物語
+      if(/[ァ-ヶ]{4,}/.test(c.t)) s -= 3;                                 // 長いカタカナ＝建物名
+      if(/[A-Za-z]/.test(c.t)) s -= 2;
+      if(c.idx === last || c.idx === 0) s += 2;                           // 先頭か末尾
+      return {...c, s};
+    }).sort((a,b)=>b.s-a.s);
+    name = scored[0].t.replace(/\s*(様|さん|御中)$/,"").trim();
+    scored.slice(1).forEach(c=>rest.push(c.t));                           // 残りは住所へ戻す
+  }
+
+  return { zip, name, pref, parts: rest.map(normNum), tel };
+}
+
+/* ===== 住所を4行（各全角20字）に詰める ===== */
+function splitWide(s, lim){
+  const out = [];
+  let cur = "";
+  for(const ch of s){
+    if(w(cur+ch) > lim){ out.push(cur); cur = ch; } else cur += ch;
+  }
+  if(cur) out.push(cur);
+  return out;
+}
+function rankOf(p){
+  if(/^[^0-9]+[市区町村郡]$/.test(p)) return 0;      // 「豊中市」「渋谷区」だけの塊
+  if(/[市区町村郡]/.test(p)) return 1;               // 市区町村＋町域
+  if(BLDG_KW.test(p)) return 3;                      // 建物・部屋
+  return 2;                                          // 番地など
+}
+function buildAddr(pref, parts){
+  let units = [];
+  if(pref) units.push(pref);
+  const sorted = parts.filter(Boolean)
+    .map((p,i)=>({p,i,r:rankOf(p)}))
+    .sort((a,b)=> a.r-b.r || a.i-b.i)
+    .map(o=>o.p);
+  sorted.forEach(p=>units.push(p));
+  // 長すぎる単位はその場で割る
+  let flat = [];
+  units.forEach(u=>{ (w(u)>LIM_ADDR ? splitWide(u,LIM_ADDR) : [u]).forEach(x=>flat.push(x)); });
+  // 4枠を超えるぶんは、入るところに連結して畳む
+  while(flat.length > 4){
+    let merged = false;
+    for(let i=flat.length-1;i>0;i--){
+      if(w(flat[i-1]+flat[i]) <= LIM_ADDR){ flat[i-1] = flat[i-1]+flat[i]; flat.splice(i,1); merged = true; break; }
+    }
+    if(!merged) break; // どうしても入らない → 5行目以降は落ちる（画面で赤く出す）
+  }
+  const a = [flat[0]||"", flat[1]||"", flat[2]||"", flat[3]||""];
+  return { a, overflow: flat.slice(4).join("") };
+}
+
+/* ===== 状態 ===== */
+const S = {
+  list: [],
+  defItem: "書籍",
+  header: "お届け先郵便番号,お届け先氏名,お届け先敬称,お届け先住所1行目,お届け先住所2行目,お届け先住所3行目,お届け先住所4行目,内容品",
+  keisho: "様",
+};
+function save(){ try{ localStorage.setItem("cp_state", JSON.stringify(S)); }catch(e){} }
+function load(){
+  try{
+    const j = JSON.parse(localStorage.getItem("cp_state")||"{}");
+    if(j.list) S.list = j.list;
+    if(j.defItem) S.defItem = j.defItem;
+    if(j.header) S.header = j.header;
+    if(j.keisho) S.keisho = j.keisho;
+  }catch(e){}
+}
+
+/* ===== DOM ===== */
+const $ = id => document.getElementById(id);
+function msg(text, kind){
+  const m = $("msg");
+  if(!text){ m.className = "msg"; m.textContent=""; return; }
+  m.className = "msg show " + (kind||"ok"); m.textContent = text;
+}
+
+/* --- 振り分け結果カード（編集できる） --- */
+let draft = [];
+function renderPreview(){
+  const box = $("preview");
+  box.innerHTML = "";
+  if(!draft.length) return;
+
+  const h = document.createElement("h2");
+  h.textContent = "振り分け結果（直せます）";
+  box.appendChild(h);
+
+  draft.forEach((d,i)=>{
+    const c = document.createElement("div");
+    c.className = "card parsed";
+    c.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span class="tag">${i+1}件目</span>
+        <button class="x" data-del="${i}" style="width:auto;background:none;border:none;color:var(--sub);font-size:20px">×</button>
+      </div>
+      <div class="f"><label>郵便番号 <span class="lim" data-lim="zip"></span></label><input data-k="zip" inputmode="numeric" value="${esc(d.zip)}"></div>
+      <div class="f"><label>氏名 <span class="lim" data-lim="name"></span></label><input data-k="name" value="${esc(d.name)}"></div>
+      <div class="f"><label>住所1（都道府県） <span class="lim" data-lim="a0"></span></label><input data-k="a0" value="${esc(d.a[0])}"></div>
+      <div class="f"><label>住所2（市区町村） <span class="lim" data-lim="a1"></span></label><input data-k="a1" value="${esc(d.a[1])}"></div>
+      <div class="f"><label>住所3（番地） <span class="lim" data-lim="a2"></span></label><input data-k="a2" value="${esc(d.a[2])}"></div>
+      <div class="f"><label>住所4（建物） <span class="lim" data-lim="a3"></span></label><input data-k="a3" value="${esc(d.a[3])}"></div>
+      <div class="f"><label>内容品 <span class="lim" data-lim="item"></span></label><input data-k="item" value="${esc(d.item)}"></div>
+      ${d.overflow ? `<div class="hint" style="color:var(--warn)">住所が4行に収まりきりませんでした（あふれ：${esc(d.overflow)}）。どこかに入れてください。</div>` : ""}
+    `;
+    c.querySelectorAll("input").forEach(inp=>{
+      inp.addEventListener("input", ()=>{
+        const k = inp.dataset.k;
+        if(k === "zip") draft[i].zip = inp.value;
+        else if(k === "name") draft[i].name = inp.value;
+        else if(k === "item") draft[i].item = inp.value;
+        else draft[i].a[Number(k.slice(1))] = inp.value;
+        paintLimits(c, draft[i]);
+        refreshAddBtn();
+      });
+    });
+    c.querySelector("[data-del]").addEventListener("click", ()=>{ draft.splice(i,1); renderPreview(); });
+    box.appendChild(c);
+    paintLimits(c, d);
+  });
+
+  const btn = document.createElement("button");
+  btn.id = "btnAdd";
+  btn.textContent = `この ${draft.length} 件をリストに追加`;
+  btn.style.marginBottom = "6px";
+  btn.addEventListener("click", ()=>{
+    const bad = draft.filter(d=>!valid(d));
+    if(bad.length){ msg("赤くなっている欄があります。直してから追加してください。","err"); return; }
+    S.list = S.list.concat(draft.map(d=>({...d, a:[...d.a]})));
+    draft = []; $("paste").value = "";
+    save(); renderPreview(); renderList();
+    msg("リストに追加しました。","ok");
+    window.scrollTo({top:document.body.scrollHeight, behavior:"smooth"});
+  });
+  box.appendChild(btn);
+  refreshAddBtn();
+}
+function refreshAddBtn(){
+  const b = $("btnAdd"); if(!b) return;
+  b.textContent = `この ${draft.length} 件をリストに追加`;
+}
+function paintLimits(card, d){
+  const map = {
+    zip:[d.zip.replace(/[^\d]/g,"").length, 7, v=>v===7],
+    name:[w(d.name), LIM_NAME, v=>v>0 && v<=LIM_NAME],
+    a0:[w(d.a[0]), LIM_ADDR, v=>v<=LIM_ADDR],
+    a1:[w(d.a[1]), LIM_ADDR, v=>v<=LIM_ADDR],
+    a2:[w(d.a[2]), LIM_ADDR, v=>v<=LIM_ADDR],
+    a3:[w(d.a[3]), LIM_ADDR, v=>v<=LIM_ADDR],
+    item:[w(d.item), LIM_ITEM, v=>v>0 && v<=LIM_ITEM],
+  };
+  Object.entries(map).forEach(([k,[val,lim,ok]])=>{
+    const s = card.querySelector(`[data-lim="${k}"]`);
+    const inp = card.querySelector(`[data-k="${k}"]`);
+    if(!s) return;
+    s.textContent = k==="zip" ? `${val}/7桁` : `${val}/${lim}`;
+    const good = ok(val);
+    s.classList.toggle("over", !good);
+    if(inp) inp.classList.toggle("over", !good);
+  });
+  const anyAddr = d.a.some(x=>x.trim());
+  const s0 = card.querySelector('[data-lim="a0"]');
+  if(s0 && !anyAddr) s0.classList.add("over");
+}
+function valid(d){
+  if(d.zip.replace(/[^\d]/g,"").length !== 7) return false;
+  if(!d.name.trim() || w(d.name) > LIM_NAME) return false;
+  if(!d.a.some(x=>x.trim())) return false;
+  if(d.a.some(x=>w(x) > LIM_ADDR)) return false;
+  if(!d.item.trim() || w(d.item) > LIM_ITEM) return false;
+  return true;
+}
+function esc(s){return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+
+/* --- 送るリスト --- */
+function renderList(){
+  const box = $("list"); box.innerHTML = "";
+  $("hcount").textContent = `${S.list.length} / 40`;
+  $("lcount").textContent = S.list.length > MAX_ROWS ? `（${Math.ceil(S.list.length/MAX_ROWS)}ファイルに分かれます）` : "";
+  $("btnCsv").disabled = S.list.length === 0;
+  $("btnCsv").textContent = S.list.length ? `CSVを作る（${S.list.length}件）` : "CSVを作る";
+  if(!S.list.length){
+    box.innerHTML = '<div class="empty">まだ空です。上に貼り付けて「振り分ける」。</div>';
+    return;
+  }
+  S.list.forEach((d,i)=>{
+    const el = document.createElement("div");
+    el.className = "item";
+    const addr = d.a.filter(Boolean).join(" ");
+    el.innerHTML = `
+      <div class="n">${i+1}</div>
+      <div class="b">
+        <div class="nm">${esc(d.name)} ${esc(S.keisho)}　<span class="tag">${esc(d.zip)}</span></div>
+        <div class="ad">${esc(addr)}</div>
+        <div class="ct">内容品：${esc(d.item)}</div>
+      </div>
+      <button class="x" title="削除">×</button>`;
+    el.querySelector(".x").addEventListener("click", ()=>{ S.list.splice(i,1); save(); renderList(); });
+    box.appendChild(el);
+  });
+}
+
+/* ===== CSV出力（Shift-JIS） ===== */
+function csvCell(v){
+  v = String(v==null?"":v);
+  return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v;
+}
+function buildCsv(rows){
+  const lines = [S.header];
+  rows.forEach(d=>{
+    lines.push([
+      d.zip.replace(/[^\d]/g,""),
+      d.name.trim(),
+      S.keisho,
+      d.a[0]||"", d.a[1]||"", d.a[2]||"", d.a[3]||"",
+      d.item.trim()
+    ].map(csvCell).join(","));
+  });
+  return lines.join("\r\n") + "\r\n";
+}
+function downloadSjis(text, filename){
+  const unicode = Encoding.stringToCode(text);
+  const sjis = Encoding.convert(unicode, {to:"SJIS", from:"UNICODE"});
+  const blob = new Blob([new Uint8Array(sjis)], {type:"text/csv"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+function stamp(){
+  const d = new Date(), p = n => String(n).padStart(2,"0");
+  return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}`;
+}
+
+/* ===== イベント ===== */
+$("btnParse").addEventListener("click", ()=>{
+  const raw = $("paste").value.trim();
+  if(!raw){ msg("貼り付けが空です。","err"); return; }
+  const blocks = splitBlocks(raw);
+  draft = blocks.map(b=>{
+    const p = parseBlock(b);
+    const built = buildAddr(p.pref, p.parts);
+    return { zip:p.zip, name:p.name, a:built.a, item:S.defItem, overflow:built.overflow };
+  }).filter(d => d.zip || d.name || d.a.some(x=>x));
+  renderPreview();
+  const ng = draft.filter(d=>!valid(d)).length;
+  msg(ng ? `${draft.length}件に分けました。うち${ng}件は要修正（赤い欄）。` : `${draft.length}件に分けました。中身を見て問題なければ追加。`, ng?"err":"ok");
+  $("preview").scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+$("btnClear").addEventListener("click", ()=>{ $("paste").value=""; draft=[]; renderPreview(); msg(""); });
+
+$("btnWipe").addEventListener("click", ()=>{
+  if(!S.list.length) return;
+  if(confirm(`リストの${S.list.length}件を全部消します。いい？`)){ S.list=[]; save(); renderList(); }
+});
+
+$("btnCsv").addEventListener("click", ()=>{
+  const bad = S.list.map((d,i)=>valid(d)?null:i+1).filter(x=>x);
+  if(bad.length){ msg(`${bad.join("・")}件目に不備があります（郵便番号7桁・氏名・住所・内容品）。`,"err"); return; }
+  const chunks = [];
+  for(let i=0;i<S.list.length;i+=MAX_ROWS) chunks.push(S.list.slice(i,i+MAX_ROWS));
+  chunks.forEach((c,i)=>{
+    const name = chunks.length>1 ? `clickpost_${stamp()}_${i+1}.csv` : `clickpost_${stamp()}.csv`;
+    setTimeout(()=>downloadSjis(buildCsv(c), name), i*700);
+  });
+  msg(chunks.length>1 ? `${chunks.length}ファイルに分けて保存しました。` : "CSVを保存しました。クリックポストの「まとめ申込」で選んでください。","ok");
+});
+
+["defItem","header","keisho"].forEach(k=>{
+  $(k).addEventListener("input", ()=>{ S[k] = $(k).value; save(); renderList(); });
+  $(k).addEventListener("change", ()=>{ S[k] = $(k).value; save(); renderList(); });
+});
+
+/* ===== 起動 ===== */
+load();
+$("defItem").value = S.defItem;
+$("header").value  = S.header;
+$("keisho").value  = S.keisho;
+renderList();
+</script>
+</body>
+</html>
