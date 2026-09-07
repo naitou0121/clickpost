@@ -54,6 +54,13 @@ Amazon自己発送の宛先を**貼り付けるだけ**で振り分けて、ク�
 - `index.html` … アプリ本体（これだけで動く）
 - `encoding.min.js` … Shift-JIS変換ライブラリ（encoding-japanese v2.2.0・同階層必須）
 - `manifest.json` … ホーム画面追加用
+- `icon.svg` / `icon-180.png` / `icon-192.png` / `icon-512.png` … ホーム画面アイコン（赤・封筒＋2本線）。作り直すときは icon.svg を直してPNGを書き出す
+
+## 公開
+
+- 本番：https://naitou0121.github.io/clickpost/ ／ repo：naitou0121/clickpost
+- 更新：このフォルダを直して `git add -A && git commit && git push`（フォルダ自体がリポジトリ）
+- ⚠️ iOSはホーム画面アイコンをキャッシュする。アイコンを変えたら**一度削除して追加し直す**
 
 ## 検証済み（2026-09-07）
 
